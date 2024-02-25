@@ -1,0 +1,53 @@
+<html>
+<body>
+<div id="chart_div" style="width: 100%; height: 500px;">
+    <canvas id="myChart" style="width:100%;max-width:700px"></canvas>
+    <p id="values"></p>
+</div>
+<script src="https://www.gstatic.com/charts/loader.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+<script src="https://js.pusher.com/8.0.1/pusher.min.js"></script>
+<script>
+    const xValues = ["Microsoft", "Apple", "Saudi Arabian Oil", "Nvidia", "Alphabet", "Amazon"];
+    let yValues = [3049, 2818, 2065, 1970, 1817, 1798];
+    const barColors = ["red", "green", "blue", "orange", "brown", "lightblue"];
+
+    let myChart = new Chart("myChart", {
+        type: "doughnut",
+        data: {
+            labels: xValues,
+            datasets: [{
+                backgroundColor: barColors,
+                data: yValues
+            }]
+        },
+        options: {
+            title: {
+                display: true,
+                text: "Real-time largest companies by market cap (Billions)"
+            }
+        }
+    });
+
+    Pusher.logToConsole = true;
+    const pusher = new Pusher(
+        "5c3bcef6949e13de7f9e",
+        {
+            cluster: "eu",
+            forceTLS: true,
+        }
+    );
+    let values = document.getElementById("values");
+    values.innerText = xValues[0] + ": " + yValues[0]
+
+    const channel = pusher.subscribe("market-cap");
+    channel.bind("new-price", (data) => {
+        myChart.data.datasets[0].data = data.values;
+        values.innerText = xValues[0] + ": " + data.values[0] + "\n" + xValues[1] + ": " + data.values[1] + "\n" + xValues[2] + ": " + data.values[2] + "\n" + xValues[3] + ": " + data.values[3] + "\n" + xValues[4] + ": " + data.values[4] + "\n" + xValues[5] + ": " + data.values[5];
+        myChart.update();
+    });
+
+
+</script>
+</body>
+</html>
